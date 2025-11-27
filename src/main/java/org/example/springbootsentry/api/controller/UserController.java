@@ -1,5 +1,7 @@
 package org.example.springbootsentry.api.controller;
 
+import io.sentry.Sentry;
+import io.sentry.SentryLevel;
 import org.example.springbootsentry.api.model.User;
 import org.example.springbootsentry.service.UserService;
 import org.slf4j.Logger;
@@ -24,17 +26,21 @@ public class UserController {
 
     @GetMapping("/user")
     public User getUser(@RequestParam int id) {
-        log.info("Get User with id {}", id);
+        Sentry.setTag("user.id.requested", String.valueOf(id));
+        log.info("Requesting user with id={}", id);
+
         Optional user = userService.getUser(id);
         if (user.isPresent()) {
             return (User) user.get();
+        } else {
+            log.warn("User not found with id={}", id);
+            Sentry.captureMessage("User not found: " + id, SentryLevel.WARNING);
         }
         return null;
     }
 
     @GetMapping("/errors")
     public String triggerException(){
-        log.info("Trigger Exception");
         throw new RuntimeException("error roài hẹ hẹ hẹ");
     }
 }
