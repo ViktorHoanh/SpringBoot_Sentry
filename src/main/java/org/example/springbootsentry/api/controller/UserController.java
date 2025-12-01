@@ -26,16 +26,12 @@ public class UserController {
 
     @GetMapping("/user")
     public User getUser(@RequestParam int id) {
-        Sentry.setTag("user.id.requested", String.valueOf(id));
-        log.info("Requesting user with id={}", id);
 
         Optional user = userService.getUser(id);
         if (user.isPresent()) {
             return (User) user.get();
-        } else {
-            log.warn("User not found with id={}", id);
-            Sentry.captureMessage("User not found: " + id, SentryLevel.WARNING);
         }
+
         return null;
     }
 
